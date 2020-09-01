@@ -1,0 +1,10 @@
+---
+- name: Download Mono
+  get_url:
+    url: https://download.mono-project.com/archive/6.6.0/macos-10-universal/MonoFramework-MDK-6.6.0.161.macos10.xamarin.universal.pkg
+    dest: "{{ downloads_directory }}/MonoFramework-MDK-6.6.0.161.macos10.xamarin.universal.pkg"
+
+- name: Install Mono
+  command: >
+    installer -package "{{ downloads_directory }}/MonoFramework-MDK-6.6.0.161.macos10.xamarin.universal.pkg" -target /
+  become: yes

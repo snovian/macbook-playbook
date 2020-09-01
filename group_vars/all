@@ -1,4 +1,5 @@
----
+# -*-yaml-*-
+
 # Can't specify homebrew package versions until this is fixed:
 # https://github.com/ansible/ansible/issues/22696
 
@@ -58,7 +59,8 @@ jdk_checksum: "md5:7205cff06dd8ff134f33535ceda0ea96"
 
 defaultbrowser_version: "1.0"
 
-ffmpeg_version: "15.05.2017"
+# https://evermeet.cx/ffmpeg/
+ffmpeg_version: "4.2.2"
 
 fish_version: "3.0.2"
 fish_foreign_env_version: "baefbd690f0b52cb8746f3e64b326d82834d07c5"
@@ -73,7 +75,7 @@ leiningen_checksum: "md5:9f90d51bffa55691aa0f4e305249d42b"
 
 # https://nodejs.org/dist/
 # https://github.com/nodejs/node/releases
-node_version: "13.12.0"
+node_version: "14.3.0"
 
 # Wait until https://github.com/wkhtmltopdf/wkhtmltopdf/issues/3241 gets fixed
 # before upgrading from 0.12.3.
@@ -152,8 +154,8 @@ tealdeer_version: "1.1.0"
 
 firefox_version: "64.0.2"
 
-cmake_version: "3.10.0-rc4"
-cmake_version_path: "v3.10"
+# https://cmake.org/download/
+cmake_version: "3.17.2"
 
 maven_version: "3.5.2" # homebrew is terrible and doesn't work with versions??
 
@@ -179,7 +181,9 @@ mactex_version: "" # not configurable at the moment
 
 google_photos_version: "" # not configurable at the moment
 
-python3_version: "3.7.3"
+# https://www.python.org/ftp/python/
+python3_version: "3.8.3"
+python3_macos_version: "10.9" # this is used in the .pkg file name.
 python3_version_major_minor: "{{ python3_version | regex_replace('^([0-9]+)\\.([0-9]+)(?:\\.[0-9]+)?$', '\\1.\\2') }}"
 
 ktlint_version: "0.33.0"
