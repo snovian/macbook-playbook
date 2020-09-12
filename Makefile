@@ -1,9 +1,14 @@
-BOOTSTRAP_PIP                   := pip
-PIP                             := pip3
-PYTHON2_VERSION                 := 2.7
-PYTHON3_VERSION                 := 3.7
-PYTHON2_BIN_PATH                := ~/Library/Python/$(PYTHON2_VERSION)/bin
-PYTHON3_BIN_PATH                := ~/Library/Python/$(PYTHON3_VERSION)/bin
+BOOTSTRAP_PYTHON_VERSION        := 3.7
+BOOTSTRAP_PYTHON_PREFIX         := /usr/bin
+BOOTSTRAP_PYTHON_BIN_PATH       := ~/Library/Python/$(BOOTSTRAP_PYTHON_VERSION)/bin
+BOOTSTRAP_PIP                   := $(BOOTSTRAP_PYTHON_PREFIX)/python3 -m pip 
+
+PYTHON_VERSION                  := 3.8
+PYTHON_PREFIX                   := /usr/local/bin
+PYTHON_BIN_PATH                 := ~/Library/Python/$(PYTHON_VERSION)/bin
+PYTHON                          := $(PYTHON_PREFIX)/python3
+PIP                             := $(PYTHON) -m pip 
+
 MACOS_VERSION                   := 10.14
 MACOS_SDK_HEADERS_PKG           := /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_$(MACOS_VERSION).pkg
 LOCAL_PROJECT_DIRECTORY         := $(shell pwd)
@@ -14,29 +19,31 @@ ANSIBLE_INVENTORY               := $(ANSIBLE_DIRECTORY)/hosts
 ANSIBLE_VERBOSE                 := -v
 ANSIBLE_VAULT_PASSWORD_FILE     := $(ANSIBLE_DIRECTORY)/.ansible_vault_password
 ANSIBLE_SENSITIVE_CONTENT_FILES := \
+  $(ANSIBLE_ROLES_DIRECTORY)/better-touch-tool/files/license.xml \
   $(ANSIBLE_ROLES_DIRECTORY)/awscli/files/credentials \
   $(ANSIBLE_ROLES_DIRECTORY)/ssh-keys/files/id_rsa \
   $(ANSIBLE_ROLES_DIRECTORY)/s3cmd/files/.s3cfg \
   $(ANSIBLE_ROLES_DIRECTORY)/dotfiles/vars/environment.yml \
   $(ANSIBLE_ROLES_DIRECTORY)/prey/vars/api_key.yml
 
-ANSIBLE_COMMAND := \
-	ansible-playbook $(ANSIBLE_VERBOSE) \
+ANSIBLE := \
+	$(PYTHON_BIN_PATH)/ansible-playbook $(ANSIBLE_VERBOSE) \
 		-i $(ANSIBLE_INVENTORY) \
 		--extra-vars "local_project_directory=$(LOCAL_PROJECT_DIRECTORY)" \
 		$(ARGS)
 
-ANSIBLE_COMMAND_LOCAL := \
-	ansible-playbook $(ANSIBLE_VERBOSE) \
+ANSIBLE_LOCAL := \
+	$(PYTHON_BIN_PATH)/ansible-playbook $(ANSIBLE_VERBOSE) \
 		-i $(ANSIBLE_INVENTORY) \
 		--extra-vars "local_project_directory=$(LOCAL_PROJECT_DIRECTORY)" \
 		$(ARGS)
 
-ANSIBLE_COMMAND_LOCAL_WITH_VAULT := \
-	$(ANSIBLE_COMMAND_LOCAL) --vault-password-file $(ANSIBLE_VAULT_PASSWORD_FILE)
+ANSIBLE_LOCAL_WITH_VAULT := \
+	$(ANSIBLE_LOCAL) --vault-password-file $(ANSIBLE_VAULT_PASSWORD_FILE)
 
-VAULT_COMMAND := \
-	ansible-vault --vault-password-file $(ANSIBLE_VAULT_PASSWORD_FILE)
+ANSIBLE_VAULT = \
+	$(PYTHON_BIN_PATH)/ansible-vault $(1) \
+		--vault-password-file $(ANSIBLE_VAULT_PASSWORD_FILE)
 
 .PHONY: \
 	clean_bootstrap_pip \
@@ -60,6 +67,7 @@ VAULT_COMMAND := \
 clean_bootstrap_pip:
 	sudo python -m pip uninstall pip
 
+# only required for Mojave.
 get_bootstrap_pip:
 	curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 	python get-pip.py --user --force-reinstall
@@ -69,32 +77,29 @@ get_bootstrap_pip:
 	@test -s $(ANSIBLE_VAULT_PASSWORD_FILE) \
 		|| echo "ATTENTION: Please create '$(PWD)/$(ANSIBLE_VAULT_PASSWORD_FILE)' with this project's Ansible Vault password" && exit 1
 
-# TODO: install Python 3 manually outside Ansible?
-bootstrap: .ansible_vault_password
-	@sudo installer -package $(MACOS_SDK_HEADERS_PKG) -target /
-	@export PATH="$(PYTHON2_BIN_PATH):$$PATH"; $(BOOTSTRAP_PIP) install --user --ignore-installed six ansible
-	@export PATH="$(PYTHON2_BIN_PATH):$$PATH"; $(ANSIBLE_COMMAND_LOCAL_WITH_VAULT) $(ANSIBLE_PLAYBOOKS_DIRECTORY)/bootstrap.yml
-	@export PATH="$(PYTHON3_BIN_PATH):$$PATH"; $(PIP) install --user --ignore-installed six ansible
+# TODO: install Python 3 manually outside Ansible? Only required for Mojave.
+bootstrap: upgrade_pip
+	# @sudo installer -package $(MACOS_SDK_HEADERS_PKG) -target / # this is only needed in Mojave.
+	# headers are available in "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/" in Catalina.
+	$(BOOTSTRAP_PIP) install --user ansible
+	sudo $(ANSIBLE_LOCAL_WITH_VAULT) $(ANSIBLE_PLAYBOOKS_DIRECTORY)/bootstrap.yml
+	$(PIP) install --user ansible
 
 upgrade_pip:
 	@$(PIP) install --upgrade pip
 
-# https://github.com/pypa/pip/issues/3165#issuecomment-146666737
+# six on Mojave: https://github.com/pypa/pip/issues/3165#issuecomment-146666737
 upgrade_ansible:
-	@$(PIP) install --user --upgrade --ignore-installed six ansible
+	@$(PIP) install --user --upgrade ansible
 
 converge:
-	@$(ANSIBLE_COMMAND_LOCAL_WITH_VAULT) $(ANSIBLE_PLAYBOOKS_DIRECTORY)/main.yml
+	@$(ANSIBLE_LOCAL_WITH_VAULT) $(ANSIBLE_PLAYBOOKS_DIRECTORY)/main.yml
 
 encrypt:
-	@ansible-vault encrypt \
-		--vault-password-file $(ANSIBLE_VAULT_PASSWORD_FILE) \
-		$(ANSIBLE_SENSITIVE_CONTENT_FILES)
+	$(call ANSIBLE_VAULT,encrypt) $(ANSIBLE_SENSITIVE_CONTENT_FILES)
 
 decrypt:
-	@ansible-vault decrypt \
-		--vault-password-file $(ANSIBLE_VAULT_PASSWORD_FILE) \
-		$(ANSIBLE_SENSITIVE_CONTENT_FILES)
+	$(call ANSIBLE_VAULT,decrypt) $(ANSIBLE_SENSITIVE_CONTENT_FILES)
 
 .PHONY: truncate-sensitive-files
 truncate-sensitive-files:

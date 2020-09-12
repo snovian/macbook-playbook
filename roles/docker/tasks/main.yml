@@ -1,23 +1,12 @@
 ---
-- name: Download Docker
-  get_url: >
-    url=https://download.docker.com/mac/stable/Docker.dmg
-    dest={{ downloads_directory }}/Docker.dmg
-
-- name: Mount the Docker image
-  command: >
-    chdir={{ downloads_directory }}
-    hdiutil attach -nobrowse Docker.dmg
-    creates=/Volumes/Docker
-
+# WAITING: waiting on
+# https://github.com/ansible-collections/community.general/issues/864 to be
+# fixed so that re-running this task doesn't fail when the package is already
+# installed.
 - name: Install Docker
-  command: >
-    cp -R /Volumes/Docker/Docker.app /Applications
-    creates=/Applications/Docker.app
-  become: yes
+  homebrew:
+    name: homebrew/cask/docker
+    # name: "homebrew/cask/docker@{{ docker_version }}"
+    state: latest
 
-- name: Unmount the Docker image
-  command: hdiutil detach /Volumes/Docker
-
-- name: Start Docker
-  command: open /Applications/Docker.app
+# TODO: open it if it was just installed for the first time?

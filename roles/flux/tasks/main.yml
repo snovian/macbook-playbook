@@ -1,0 +1,10 @@
+---
+# WAITING: waiting on
+# https://github.com/ansible-collections/community.general/issues/864 to be
+# fixed so that re-running this task doesn't fail when the package is already
+# installed.
+- name: Install f.lux
+  homebrew:
+    name: homebrew/cask/flux 
+    # name: "homebrew/cask/flux@{{ flux_version }}"
+    state: latest

@@ -1,0 +1,15 @@
+---
+# - name: Install Clojure LSP
+#   homebrew:
+#     name: clojure-lsp
+#     # name: "clojure-lsp{{ clojure_lsp_version }}"
+#     state: latest
+
+# NOTE: not using the above Homebrew task because it is hard-coded to depend on
+# Java 8 from Homebrew.
+# NOTE: The task below always downloads the latest Clojure LSP.
+- name: Install Clojure LSP
+  get_url:
+    url: https://github.com/snoe/clojure-lsp/releases/latest/download/clojure-lsp
+    dest: /usr/local/bin/clojure-lsp
+    mode: u+x

@@ -1,0 +1,14 @@
+---
+# WAITING: waiting on
+# https://github.com/ansible-collections/community.general/issues/864 to be
+# fixed so that re-running this task doesn't fail when the package is already
+# installed.
+- name: Download Hack font
+  homebrew:
+    name: homebrew/cask-fonts/font-hack
+    # name: "homebrew/cask-fonts/font-hack@{{ font_hack_version }}"
+    state: latest
+
+- name: Reload fonts
+  command: fc-cache -vf
+  become: yes

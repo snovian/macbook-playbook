@@ -1,0 +1,6 @@
+---
+- name: Install Clojure
+  homebrew:
+    name: clojure/tools/clojure
+    # name: "clojure/tools/clojur@{{ clojure_version }}"
+    state: latest

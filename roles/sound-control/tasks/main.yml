@@ -1,0 +1,12 @@
+---
+# WAITING: waiting on
+# https://github.com/ansible-collections/community.general/issues/864 to be
+# fixed so that re-running this task doesn't fail when the package is already
+# installed.
+- name: Install Sound Control
+  homebrew:
+    name: homebrew/cask/sound-control 
+    # name: "homebrew/cask/sound-control@{{ sound_control_version }}"
+    state: latest
+
+# TODO: open it if it was just installed for the first time?

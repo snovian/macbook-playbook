@@ -1,0 +1,6 @@
+---
+- name: Install haskell-stack
+  homebrew:
+    name: haskell-stack
+    # name: haskell-stack@{{ haskell_stack_version }}
+    state: latest

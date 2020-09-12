@@ -1,0 +1,12 @@
+---
+# WAITING: waiting on
+# https://github.com/ansible-collections/community.general/issues/864 to be
+# fixed so that re-running this task doesn't fail when the package is already
+# installed.
+- name: Install PDF Expert
+  homebrew:
+    name: homebrew/cask/pdf-expert 
+    # name: "homebrew/cask/pdf-expert@{{ pdf_expert_version }}"
+    state: latest
+
+# TODO: open it if it was just installed for the first time?
