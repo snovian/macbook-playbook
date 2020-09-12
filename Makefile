@@ -21,7 +21,8 @@ ANSIBLE_VAULT_PASSWORD_FILE     := $(ANSIBLE_DIRECTORY)/.ansible_vault_password
 ANSIBLE_SENSITIVE_CONTENT_FILES := \
   $(ANSIBLE_ROLES_DIRECTORY)/better-touch-tool/files/license.xml \
   $(ANSIBLE_ROLES_DIRECTORY)/awscli/files/credentials \
-  $(ANSIBLE_ROLES_DIRECTORY)/ssh-keys/files/id_rsa \
+  $(ANSIBLE_ROLES_DIRECTORY)/ssh-keys/files/mpereira@pluto \
+  $(ANSIBLE_ROLES_DIRECTORY)/ssh-keys/files/mpereira@argonaut \
   $(ANSIBLE_ROLES_DIRECTORY)/s3cmd/files/.s3cfg \
   $(ANSIBLE_ROLES_DIRECTORY)/dotfiles/vars/environment.yml \
   $(ANSIBLE_ROLES_DIRECTORY)/prey/vars/api_key.yml
@@ -79,8 +80,6 @@ get_bootstrap_pip:
 
 # TODO: install Python 3 manually outside Ansible? Only required for Mojave.
 bootstrap: upgrade_pip
-	# @sudo installer -package $(MACOS_SDK_HEADERS_PKG) -target / # this is only needed in Mojave.
-	# headers are available in "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/" in Catalina.
 	$(BOOTSTRAP_PIP) install --user ansible
 	sudo $(ANSIBLE_LOCAL_WITH_VAULT) $(ANSIBLE_PLAYBOOKS_DIRECTORY)/bootstrap.yml
 	$(PIP) install --user ansible

@@ -1,3 +1,7 @@
+# TODO: 
+# - Make "private_ssh_key" be an array of keys
+# - Take hostname as an ansible parameter
+# - Create id_rsa symlink for particular host
 ---
 - name: Ensure .ssh directory exists.
   file:
